@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical" 
+    android:background="@android:color/white">
+
+    <TextView
+        android:id="@+id/tv_title"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Video Title"
+        android:textColor="@android:color/black"
+        android:textSize="22dp"
+        android:textStyle="bold"
+        android:padding="12dp"
+        android:lines="1"
+        android:ellipsize="end"
+        android:textAppearance="?android:attr/textAppearanceLarge" />
+    <FrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="230dp" >
+        
+    	<WebView 
+	        android:id="@+id/wv_video"
+	        android:layout_width="match_parent"
+	        android:layout_height="match_parent"/>
+	        
+    </FrameLayout>
+    
+    <TextView
+        android:id="@+id/tv_download_mp3"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:padding="15dp"
+        android:layout_gravity="right"
+        android:textColor="@color/primary_color"
+        android:textSize="15sp"
+        android:text="DOWNLOAD MP3"/>
+
+    <TextView
+        android:id="@+id/tv_download_video"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:padding="15dp"
+        android:layout_gravity="right"
+        android:textColor="@color/primary_color"
+        android:textSize="15sp"
+        android:text="DOWNLOAD VIDEO"/>
+        
+	<TextView
+        android:id="@+id/tv_cancel"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:padding="15dp"
+        android:layout_marginBottom="10dp"
+        android:layout_gravity="right"
+        android:textColor="@color/primary_color"
+        android:textSize="15sp"
+        android:text="CLOSE"/>
+</LinearLayout>
