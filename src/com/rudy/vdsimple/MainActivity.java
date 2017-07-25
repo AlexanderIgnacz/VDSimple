@@ -44,6 +44,7 @@ import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
+import android.widget.Toast;
 import android.widget.TextView.OnEditorActionListener;
 
 public class MainActivity extends Activity implements OnClickListener, OnItemClickListener {
@@ -70,6 +71,8 @@ public class MainActivity extends Activity implements OnClickListener, OnItemCli
 	Button mBtnEngine;
 	
 	boolean m_isEmpty = false;
+	boolean m_isCanLoadMore = true;
+	
 	EditText mETSearch;
 	TextView mTVTitle;
 	ListView mLVVideos;
@@ -114,7 +117,7 @@ public class MainActivity extends Activity implements OnClickListener, OnItemCli
                     findViewById(R.id.header_lay1).setVisibility(View.VISIBLE);
                     
                     String keyword = mETSearch.getText().toString(); 
-                    search(keyword);	
+                    search(keyword);
                     mTVTitle.setText("Result for " + keyword);
                     mETSearch.setText("");
                     return true;
@@ -129,10 +132,10 @@ public class MainActivity extends Activity implements OnClickListener, OnItemCli
 			public void onTextChanged(CharSequence s, int start, int before, int count) {
 				if (mETSearch.length() != 0){
 					mBtnCancel.setAlpha(255);
-            		m_isEmpty = false;
+            			m_isEmpty = false;
 				}
-            	else if (m_isEmpty == false)
-            		mBtnCancel.setAlpha(70);
+            		else if (m_isEmpty == false)
+            			mBtnCancel.setAlpha(70);
 			}
 			
 			@Override
@@ -163,7 +166,7 @@ public class MainActivity extends Activity implements OnClickListener, OnItemCli
 	        		m_isEmpty = true;
 	        		mETSearch.setText("");
 	        		return;
-	        	} 
+	        	}
         	
         		findViewById(R.id.header_lay2).setVisibility(View.GONE);
         		findViewById(R.id.header_lay1).setVisibility(View.VISIBLE);
@@ -171,16 +174,35 @@ public class MainActivity extends Activity implements OnClickListener, OnItemCli
 		} else if (v == mBtnEngine) {
 			m_isS1Engine = !m_isS1Engine;
 			mBtnEngine.setText(m_isS1Engine ? "S1" : "S2");
+			
+			if (mKeyword.length() > 0) {
+				if (findViewById(R.id.header_lay1).getVisibility() == View.GONE) {
+					if (mETSearch.length() != 0){
+			        		m_isEmpty = true;
+			        		mETSearch.setText("");
+			        	}
+	        	
+		        		findViewById(R.id.header_lay2).setVisibility(View.GONE);
+		        		findViewById(R.id.header_lay1).setVisibility(View.VISIBLE);
+		            ((InputMethodManager)getSystemService(Context.INPUT_METHOD_SERVICE)).hideSoftInputFromWindow(mETSearch.getWindowToken(), 0);
+				}
+				search(mKeyword);
+				Toast.makeText(this, "Music search source is changed", Toast.LENGTH_SHORT).show();
+			}
     		}
 	}
 	
 	String mKeyword = "";
-	String nextPageToken = "";
 	public void search(String keyword) {
+		mVideos = new ArrayList<VideoTrack>();
+		mAdapter = null;
 		mKeyword = keyword;
-		nextPageToken = "";
-		mLVVideos.setSelection(0);
+		mPageNumber = 0;
+		m_isCanLoadMore = true;
+		
 		if (m_isS1Engine) {
+			(new SearchCcmixter()).execute(mKeyword, mPageNumber, PAGE_SIZE);
+		} else {
 			(new SearchYouTube()).execute(mKeyword, mPageNumber, PAGE_SIZE);
 		}
 	}
@@ -192,22 +214,25 @@ public class MainActivity extends Activity implements OnClickListener, OnItemCli
 		mPageNumber ++;
 		
 		if (m_isS1Engine) {
+			(new SearchCcmixter()).execute(mKeyword, mPageNumber, PAGE_SIZE);
+		} else {
 			(new SearchYouTube()).execute(mKeyword, mPageNumber, PAGE_SIZE);
 		} 
 	}
 	
 	public void onSearched(ArrayList<VideoTrack> videos) {
 		if (videos.size() == 0) {
+			m_isCanLoadMore = false;
 			return;
 		}
 		mVideos.addAll(videos);
 		
-		if(mAdapter == null) {
+		if (mAdapter == null) {
 			mAdapter = new VideoAdapter(this, mVideos);
 			mLVVideos.setAdapter(mAdapter);
+		} else {
+			mAdapter.notifyDataSetChanged();
 		}
-		
-		mAdapter.notifyDataSetChanged();
 	}
 	
 	public void showVideo(final VideoTrack video) {
@@ -354,14 +379,14 @@ public class MainActivity extends Activity implements OnClickListener, OnItemCli
         }
     }
 		
+	String nextPageToken = "";
 	
 	public class SearchYouTube extends SearchEngine{
 	    private String YOUTUBE_BASE_URL = "https://www.googleapis.com/youtube/v3/search?part=snippet&key=AIzaSyB-vE_PNo2_1o65I2etL3aITlKRYYhzeFs&q=";
-	    private String nextPageToken;
 
 	    @Override
 	    public String GetUrl(String keyword, int page, int limit) {
-	        if (page > 1)
+	        if (page > 0)
 	        		return YOUTUBE_BASE_URL + keyword + "&maxResults=" + limit + "&pageToken=" + nextPageToken;
 	        
 	        return YOUTUBE_BASE_URL + keyword + "&maxResults=" + limit;
@@ -471,7 +496,7 @@ public class MainActivity extends Activity implements OnClickListener, OnItemCli
 
 	    @Override
 	    public String GetUrl(String keyword, int page, int limit ) {
-	    		return CCMIXTER_BASE_URL + "&search=" + keyword + "&limit=" + limit + "&offset=" + ((page - 1) * limit) + "&f=js&reqtags=remix&search_type=any";
+	    		return CCMIXTER_BASE_URL + "&search=" + keyword + "&limit=" + limit + "&offset=" + (page * limit) + "&f=js&reqtags=remix&search_type=any";
 	    }
 
 	    @Override
@@ -486,7 +511,7 @@ public class MainActivity extends Activity implements OnClickListener, OnItemCli
 	                    sTrack.source = "Ccmixter";
 	                    sTrack.videoId = track.getString("upload_id"); 
 	                    
-	                    sTrack.description = track.getString("user_name");
+	                    sTrack.channelTitle = track.getString("user_name");
 	                    sTrack.title = track.getString("upload_name");
 	                    
 	                    JSONArray files = track.getJSONArray("files");
@@ -562,7 +587,7 @@ public class MainActivity extends Activity implements OnClickListener, OnItemCli
             tvAuthor.setText(info.channelTitle);
             tvDuaration.setText(info.duration);
             
-            if(position > array.size() - 2) {
+            if(m_isCanLoadMore && array.size() > 5 && position > array.size() - 2) {
             		loadMore();
             }
             return v;
