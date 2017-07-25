@@ -39,6 +39,7 @@ import android.webkit.WebViewClient;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.BaseAdapter;
+import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.ListView;
@@ -66,7 +67,7 @@ public class MainActivity extends Activity implements OnClickListener, OnItemCli
 	
 	ImageView mBtnSearch;
 	ImageView mBtnCancel;
-	ImageView mBtnEngine;
+	Button mBtnEngine;
 	
 	boolean m_isEmpty = false;
 	EditText mETSearch;
@@ -79,6 +80,7 @@ public class MainActivity extends Activity implements OnClickListener, OnItemCli
 	
 	SearchEngine mEngine;
 	VideoAdapter mAdapter;
+	boolean m_isS1Engine = true; // S1 = ccMixter, S2= Youtube
 	
 	int PAGE_SIZE = 20;
 	int mPageNumber = 0;
@@ -90,7 +92,7 @@ public class MainActivity extends Activity implements OnClickListener, OnItemCli
 		
 		mBtnSearch = (ImageView)findViewById(R.id.btn_search);
 		mBtnCancel = (ImageView)findViewById(R.id.btn_cancel);
-		mBtnEngine = (ImageView)findViewById(R.id.btn_engine);
+		mBtnEngine = (Button)findViewById(R.id.btn_engine);
 		mETSearch = (EditText)findViewById(R.id.txt_search);
 		mLVVideos = (ListView)findViewById(R.id.lv_videos);
 		mTVTitle = (TextView)findViewById(R.id.txt_search_title);
@@ -99,8 +101,6 @@ public class MainActivity extends Activity implements OnClickListener, OnItemCli
 		mBtnCancel.setOnClickListener(this);
 		mBtnEngine.setOnClickListener(this);
 		mLVVideos.setOnItemClickListener(this);
-		
-		mEngine = new SearchYouTube();
 		
 		mETSearch.setOnEditorActionListener(new OnEditorActionListener() {
 			@Override
@@ -160,17 +160,18 @@ public class MainActivity extends Activity implements OnClickListener, OnItemCli
 		}
 		else if(v == mBtnCancel) {
 			if (mETSearch.length() != 0){
-        		m_isEmpty = true;
-        		mETSearch.setText("");
-        		return;
-        	} else if (v == mBtnEngine) {
-        		
-        	}
+	        		m_isEmpty = true;
+	        		mETSearch.setText("");
+	        		return;
+	        	} 
         	
-        	findViewById(R.id.header_lay2).setVisibility(View.GONE);
-            findViewById(R.id.header_lay1).setVisibility(View.VISIBLE);
+        		findViewById(R.id.header_lay2).setVisibility(View.GONE);
+        		findViewById(R.id.header_lay1).setVisibility(View.VISIBLE);
             ((InputMethodManager)getSystemService(Context.INPUT_METHOD_SERVICE)).hideSoftInputFromWindow(mETSearch.getWindowToken(), 0);
-		}
+		} else if (v == mBtnEngine) {
+			m_isS1Engine = !m_isS1Engine;
+			mBtnEngine.setText(m_isS1Engine ? "S1" : "S2");
+    		}
 	}
 	
 	String mKeyword = "";
@@ -179,7 +180,9 @@ public class MainActivity extends Activity implements OnClickListener, OnItemCli
 		mKeyword = keyword;
 		nextPageToken = "";
 		mLVVideos.setSelection(0);
-		mEngine.execute(keyword, mPageNumber, PAGE_SIZE);
+		if (m_isS1Engine) {
+			(new SearchYouTube()).execute(mKeyword, mPageNumber, PAGE_SIZE);
+		}
 	}
 	
 	public void loadMore() {
@@ -187,7 +190,10 @@ public class MainActivity extends Activity implements OnClickListener, OnItemCli
 			return;
 		}
 		mPageNumber ++;
-		mEngine.execute(mKeyword, mPageNumber, PAGE_SIZE);
+		
+		if (m_isS1Engine) {
+			(new SearchYouTube()).execute(mKeyword, mPageNumber, PAGE_SIZE);
+		} 
 	}
 	
 	public void onSearched(ArrayList<VideoTrack> videos) {
@@ -275,7 +281,7 @@ public class MainActivity extends Activity implements OnClickListener, OnItemCli
 	public class SearchEngine extends AsyncTask<Object, Void, Boolean>
     {
 		ArrayList<VideoTrack> listVideos;
-        
+		
         public String GetUrl(String keyword, int page, int limit) {
         		return null;
         }
@@ -458,6 +464,53 @@ public class MainActivity extends Activity implements OnClickListener, OnItemCli
 	        }
 	    }
 	    
+	}
+	
+	public class SearchCcmixter extends SearchEngine {
+	    private String CCMIXTER_BASE_URL = "http://ccmixter.org/api/query";
+
+	    @Override
+	    public String GetUrl(String keyword, int page, int limit ) {
+	    		return CCMIXTER_BASE_URL + "&search=" + keyword + "&limit=" + limit + "&offset=" + ((page - 1) * limit) + "&f=js&reqtags=remix&search_type=any";
+	    }
+
+	    @Override
+	    public void processResult(String content) {
+	        try {
+	            JSONArray results = new JSONArray(content);
+	            for (int i = 0; i < results.length(); i++) {
+	                try {
+	                    JSONObject track = results.getJSONObject(i);
+
+	                    VideoTrack sTrack = new VideoTrack();
+	                    sTrack.source = "Ccmixter";
+	                    sTrack.videoId = track.getString("upload_id"); 
+	                    
+	                    sTrack.description = track.getString("user_name");
+	                    sTrack.title = track.getString("upload_name");
+	                    
+	                    JSONArray files = track.getJSONArray("files");
+		    				JSONObject urlObject = null; //urlList.getJSONObject(0);
+		    				for(int j = 0; j< files.length(); j++) {
+		    					urlObject = files.getJSONObject(j);
+		    					if(urlObject.getString("file_nicname").equals("mp3")) {
+		    						break;
+		    					}
+		    				}
+		    				if(urlObject != null) {
+		    					sTrack.downloadUrl = urlObject.getString("download_url");
+		    					sTrack.duration = urlObject.getJSONObject("file_format_info").getString("ps");
+		    				}
+	                    listVideos.add(sTrack);
+	                }
+	                catch(Exception e) {
+	                    continue;
+	                }
+	            }
+	        } catch(Exception e) {
+	        }
+	    }
+
 	}
 	
 	public class VideoAdapter extends BaseAdapter{

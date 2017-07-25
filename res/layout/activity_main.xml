@@ -7,81 +7,82 @@
     android:layout_height="match_parent"
     android:background="@android:color/white"
     android:orientation="vertical">
-    
-
-   	<RelativeLayout 
-	    android:layout_width="match_parent"
-	    android:layout_height="55dp"
-	    android:background ="@color/primary_color">
 	    
-   	    <LinearLayout 
-	        android:id="@+id/header_lay1"
-	        android:layout_width="match_parent"
-	        android:layout_height="match_parent"
-	        android:gravity="center_vertical"
-	        android:paddingBottom="5dp"
-	        android:paddingTop="10dp">
-   	        
-	        <Button
-	            android:id="@+id/btn_engine"
-	        		android:layout_width="40dp"
-	        		android:layout_height="40dp"
-	        		android:text="S1"
-	        		android:textColor="#fff"
-	        		android:layout_marginRight="10dp"
-	        		android:background="#551A8B"
-	        		android:layout_marginLeft="5dp"/>
-	        <TextView 
-	            android:id="@+id/txt_search_title"
-	            android:layout_width="wrap_content"
-	            android:layout_height="wrap_content"
-	            android:text="VideoDownloader"
-	            android:lines="1"
-	            android:ellipsize="end"
-	            android:textColor="#ffffff"
-	            android:layout_weight="1"
-	            android:textSize="20dp"/>
-	        <ImageView
-	            android:id="@+id/btn_search"
-	        	android:layout_width="35dp"
-	        	android:layout_height="match_parent"
-	        	android:padding="6dp"
-		        android:src="@drawable/btn_search"/>
-	    </LinearLayout>
-	    
-	    <LinearLayout 
-	        android:id="@+id/header_lay2"
-	        android:layout_width="match_parent"
-	        android:layout_height="55dp"
-	        android:paddingBottom="5dp"
-	        android:paddingTop="10dp"
-	        android:visibility="gone"
-	        android:gravity="center_vertical">
-	        
-	        <EditText
-	            android:id="@+id/txt_search"
-	            android:layout_width="0dp"
-	            android:layout_height="wrap_content"
-	            android:layout_marginLeft="15dp"
-	            android:hint="Search..."
-	            android:textColorHint="#a0ffffff"
-	            android:layout_weight="1"
-	            android:background="@android:color/transparent"
-	            android:textColor="#ffffff"
-	            android:textCursorDrawable="@drawable/cursor_color"
-	            android:imeOptions="actionSearch" 
-	   			android:inputType="textNoSuggestions"/>
-	        
-	        <ImageView
-	            android:id="@+id/btn_cancel"
-	        	android:layout_width="35dp"
-	        	android:layout_height="match_parent"
-	        	android:padding="6dp"
-		        android:src="@drawable/btn_close"/>
-	    </LinearLayout>
-	    
-	</RelativeLayout>
-    
+	<LinearLayout 
+        android:layout_width="match_parent"
+        android:layout_height="55dp"
+        android:gravity="center_vertical"
+        android:paddingBottom="5dp"
+        android:paddingTop="10dp"
+        android:background ="@color/primary_color">
+  	        
+        <Button
+            android:id="@+id/btn_engine"
+        		android:layout_width="40dp"
+        		android:layout_height="40dp"
+        		android:text="S1"
+        		android:textColor="#fff"
+        		android:layout_marginRight="10dp"
+        		android:background="#551A8B"
+        		android:layout_marginLeft="5dp"/>
+        
+        <RelativeLayout 
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+            
+            <LinearLayout
+                android:id="@+id/header_lay1"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:gravity="center_vertical" >
+                <TextView 
+		            android:id="@+id/txt_search_title"
+		            android:layout_width="wrap_content"
+		            android:layout_height="wrap_content"
+		            android:text="VideoDownloader"
+		            android:lines="1"
+		            android:ellipsize="end"
+		            android:textColor="#ffffff"
+		            android:layout_weight="1"
+		            android:textSize="20dp"/>
+		        <ImageView
+		            android:id="@+id/btn_search"
+		        		android:layout_width="35dp"
+		        		android:layout_height="match_parent"
+		        		android:padding="6dp"
+			        android:src="@drawable/btn_search"/>
+            </LinearLayout>
+            
+            <LinearLayout 
+		        android:id="@+id/header_lay2"
+		        android:layout_width="match_parent"
+		        android:layout_height="match_parent"
+		        android:visibility="gone"
+		        android:gravity="center_vertical">
+		        
+		        <EditText
+		            android:id="@+id/txt_search"
+		            android:layout_width="0dp"
+		            android:layout_height="wrap_content"
+		            android:hint="Search..."
+		            android:textColorHint="#a0ffffff"
+		            android:layout_weight="1"
+		            android:background="@android:color/transparent"
+		            android:textColor="#ffffff"
+		            android:textCursorDrawable="@drawable/cursor_color"
+		            android:imeOptions="actionSearch" 
+		   			android:inputType="textNoSuggestions"/>
+		        
+		        <ImageView
+		            android:id="@+id/btn_cancel"
+		        		android:layout_width="35dp"
+		        		android:layout_height="match_parent"
+		        		android:padding="6dp"
+			        android:src="@drawable/btn_close"/>
+		    </LinearLayout>
+        </RelativeLayout>
+    </LinearLayout>
+   
     <ListView 
         android:id="@+id/lv_videos"
         android:layout_width="match_parent"
