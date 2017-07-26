@@ -110,8 +110,8 @@ public class MainActivity extends Activity implements OnClickListener, OnItemCli
 			public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
 				if (actionId == EditorInfo.IME_ACTION_SEARCH) {
 					if (mETSearch.getText().toString().length() == 0){
-                		return true;
-                	}
+                			return true;
+                		}
                     ((InputMethodManager)getSystemService(Context.INPUT_METHOD_SERVICE)).hideSoftInputFromWindow(mETSearch.getWindowToken(), 0);
                     findViewById(R.id.header_lay2).setVisibility(View.GONE);
                     findViewById(R.id.header_lay1).setVisibility(View.VISIBLE);
@@ -254,14 +254,18 @@ public class MainActivity extends Activity implements OnClickListener, OnItemCli
         WebSettings webSettings = displayYoutubeVideo.getSettings();
         webSettings.setJavaScriptEnabled(true);
         
-        String emBedUrl = "<html><style type='text/css'>.video-container { position: relative; padding-bottom: 56.25%; padding-top: 30px; height: 0; overflow: hidden; } " +
-		   ".video-container iframe, .video-container object, .video-container embed { position: absolute; top: 0; left: 0; width: 100%; height: 100%;}" + 
-		   "</style><body><div class='video-container'><iframe class=\"youtube-player\" type=\"text/html\" width=\"400\" height=\"300\" src=\"http://www.youtube.com/embed/" + video.videoId + "\" frameborder=\"0\"></div></body></html>";
-        if(!emBedUrl.isEmpty()) {
-        		displayYoutubeVideo.loadData(emBedUrl, "text/html", "utf-8");
-        }
-        else {
-        		displayYoutubeVideo.loadUrl("https://m.youtube.com/watch?v=" + video.videoId );
+        if (video.source.equals("YouTube")) {
+        		String emBedUrl = "<html><style type='text/css'>.video-container { position: relative; padding-bottom: 56.25%; padding-top: 30px; height: 0; overflow: hidden; } " +
+        			   ".video-container iframe, .video-container object, .video-container embed { position: absolute; top: 0; left: 0; width: 100%; height: 100%;}" + 
+        			   "</style><body><div class='video-container'><iframe class=\"youtube-player\" type=\"text/html\" width=\"400\" height=\"300\" src=\"http://www.youtube.com/embed/" + video.videoId + "\" frameborder=\"0\"></div></body></html>";
+    	        if(!emBedUrl.isEmpty()) {
+    	        		displayYoutubeVideo.loadData(emBedUrl, "text/html", "utf-8");
+    	        }
+    	        else {
+    	        		displayYoutubeVideo.loadUrl("https://m.youtube.com/watch?v=" + video.videoId );
+    	        }        	
+        } else {        		
+        		displayYoutubeVideo.loadUrl(video.downloadUrl);
         }
 		
 		TextView btnDownloadMp3 = (TextView) dialog.findViewById(R.id.tv_download_mp3);
@@ -273,12 +277,17 @@ public class MainActivity extends Activity implements OnClickListener, OnItemCli
 		});
         
         TextView btnDownloadVideo = (TextView) dialog.findViewById(R.id.tv_download_video);
-        btnDownloadVideo.setOnClickListener(new OnClickListener() {
-			@Override
-			public void onClick(View v) {
-				downloadFile(video.downloadUrl);
-			}
-		});
+        
+        if (m_isS1Engine) {
+        		btnDownloadVideo.setVisibility(View.GONE);
+        } else {
+	        	btnDownloadVideo.setOnClickListener(new OnClickListener() {
+	    			@Override
+	    			public void onClick(View v) {
+	    				downloadFile(video.downloadUrl);
+	    			}
+	    		});
+        }
         
         TextView btnClose = (TextView) dialog.findViewById(R.id.tv_cancel);
         btnClose.setOnClickListener(new OnClickListener() {
