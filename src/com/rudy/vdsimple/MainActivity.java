@@ -221,7 +221,7 @@ public class MainActivity extends Activity implements OnClickListener, OnItemCli
 	}
 	
 	public void onSearched(ArrayList<VideoTrack> videos) {
-		if (videos.size() == 0) {
+		if (mVideos.size() != 0 && videos.size() == 0) {
 			m_isCanLoadMore = false;
 			return;
 		}
